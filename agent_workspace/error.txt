@@ -1,0 +1,2 @@
+Failed to perform, curl: (16) . See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+Failed to perform, curl: (16) Send failure: Broken pipe. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.

@@ -1,0 +1,188 @@
+# Git ignore for AutoHedge Trading Bot
+
+# ============================================
+# MODELS & TRAINING DATA (Large files)
+# ============================================
+models/**/*.zip
+models/**/*.pth
+models/**/*.pt
+models/**/*.h5
+models/**/*.onnx
+*.zip
+*.pth
+*.pt
+*.h5
+*.onnx
+
+# Keep directory structure but ignore model files
+!models/.gitkeep
+!models/production/.gitkeep
+!models/candidates/.gitkeep
+!models/backups/.gitkeep
+
+# Training data
+training_data/**/*.json
+training_data/**/*.csv
+training_data/**/*.parquet
+!training_data/.gitkeep
+
+# ============================================
+# LOGS & CHECKPOINTS
+# ============================================
+logs/**
+checkpoints/**
+*.log
+*.log.*
+
+# TensorBoard
+runs/
+logs/tensorboard/
+
+# Keep structure
+!logs/.gitkeep
+!checkpoints/.gitkeep
+
+# ============================================
+# SECRETS & CREDENTIALS
+# ============================================
+.env
+.env.local
+.env.*.local
+*.env
+secrets/
+credentials/
+*.key
+*.pem
+*.p12
+
+# Binance API keys
+binance_keys.json
+api_config.json
+
+# DeepSeek API
+deepseek_config.json
+
+# ============================================
+# VIRTUAL ENVIRONMENTS
+# ============================================
+venv/
+env/
+ENV/
+training_env/
+.venv/
+*.virtualenv
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ============================================
+# TRADING DATA (Generated at runtime)
+# ============================================
+bot_state.json
+paper_trading_*.log
+paper_trading_*.json
+*.db
+*.sqlite
+*.sqlite3
+
+# Position history
+positions/
+trades/
+executions/
+
+# ============================================
+# TEMPORARY FILES
+# ============================================
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ============================================
+# IDE & EDITOR
+# ============================================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.vs/
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# ============================================
+# SYSTEM FILES
+# ============================================
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# ============================================
+# DOCUMENTATION BUILD
+# ============================================
+docs/_build/
+docs/.doctrees/
+site/
+
+# ============================================
+# TESTING
+# ============================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# ============================================
+# ALLOW CERTAIN FILES (Exceptions)
+# ============================================
+# Keep example configs (with dummy values)
+!config/training_config.yaml
+!.env.example
+
+# Keep registry (tracks model versions)
+!models/registry.json
+
+# Keep documentation
+!*.md
+!LICENSE
+!README.md

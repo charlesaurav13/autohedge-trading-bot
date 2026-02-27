@@ -1,0 +1,196 @@
+# Training Pipeline Configuration
+# Edit this file to tune hyperparameters without changing code
+
+# ============================================
+# DATA SPLITTING
+# ============================================
+data:
+  train_ratio: 0.80  # 80% for training
+  val_ratio: 0.10    # 10% for validation
+  test_ratio: 0.10   # 10% for testing (never seen during training!)
+  
+  # Minimum episodes required
+  min_episodes_for_training: 10
+  min_episodes_for_phase2: 20
+
+# ============================================
+# PHASE 1: HISTORICAL PRE-TRAINING
+# ============================================
+phase1:
+  crypto: "BTC"           # BTC, ETH, or SOL
+  history_days: 180       # 6 months of data
+  interval: "1h"          # 1-hour candles
+  
+  training:
+    total_timesteps: 100_000
+    eval_freq: 5_000      # Evaluate every 5K steps
+    patience: 5           # Stop if no improvement for 5 evals
+    
+  hyperparameters:
+    learning_rate: 0.0003
+    n_steps: 2048
+    batch_size: 64
+    n_epochs: 10
+    gamma: 0.99           # Discount factor
+    gae_lambda: 0.95      # GAE parameter
+    clip_range: 0.2       # PPO clip range
+    ent_coef: 0.01        # Entropy coefficient (exploration)
+    vf_coef: 0.5          # Value function coefficient
+    max_grad_norm: 0.5    # Gradient clipping
+    
+  network:
+    policy: "MlpPolicy"
+    net_arch:
+      - 256
+      - 256
+    activation: "relu"
+
+# ============================================
+# PHASE 2: PAPER TRADING FINE-TUNING
+# ============================================
+phase2:
+  log_file: "bot_local_final.log"
+  
+  training:
+    total_timesteps: 10_000
+    eval_freq: 1_000
+    patience: 3           # Lower patience for fine-tuning
+    
+  # Use same hyperparameters as Phase 1, but optionally adjust:
+  hyperparameters:
+    learning_rate: 0.0001  # Lower LR for fine-tuning
+    batch_size: 32         # Smaller batch for small dataset
+
+# ============================================
+# QUALITY GATES (DEPLOYMENT CRITERIA)
+# ============================================
+quality_gates:
+  # Minimum performance requirements
+  min_val_win_rate: 0.35          # 35% win rate minimum (realistic for noisy historical crypto data)
+  min_val_sharpe: 0.8             # Sharpe ratio minimum
+  
+  # Overtraining detection
+  max_train_val_gap: 0.10         # 10% max difference
+  max_val_test_gap: 0.08          # 8% max difference
+  
+  # Improvement requirements (vs baseline)
+  min_improvement: 0.00           # Accept any improvement for initial training
+  
+  # Confidence requirements
+  min_trades_for_eval: 20         # Need 20 trades minimum
+
+# ============================================
+# MODEL VERSIONING
+# ============================================
+versioning:
+  registry_file: "models/registry.json"
+  
+  paths:
+    production: "models/production/"
+    candidates: "models/candidates/"
+    experiments: "models/experiments/"
+    backups: "models/backups/"
+  
+  naming:
+    major: "1"    # Increment on architecture change
+    minor: "2"    # Increment on retraining
+    patch: "0"    # Increment on bug fixes
+
+# ============================================
+# A/B TESTING
+# ============================================
+ab_testing:
+  enabled: true
+  split_ratio: 0.5              # 50/50 split
+  min_samples: 50               # Minimum trades before decision
+  confidence_level: 0.95        # 95% confidence for t-test
+  
+  duration:
+    min_days: 3                 # Run for at least 3 days
+    max_days: 14                # Maximum 2 weeks
+
+# ============================================
+# MONITORING & ALERTS
+# ============================================
+monitoring:
+  # Performance degradation alerts
+  alert_if_win_rate_drops: 0.10      # Alert if drops >10%
+  alert_if_sharpe_drops: 0.3         # Alert if Sharpe drops >0.3
+  alert_if_drawdown_exceeds: 0.15    # Alert if drawdown >15%
+  
+  # Trading behavior alerts
+  alert_if_trades_per_day_exceeds: 10
+  alert_if_position_size_exceeds: 0.50  # 50% of capital
+  
+  # Model drift detection
+  check_drift_every_days: 7
+  retrain_if_drift_detected: true
+
+# ============================================
+# AUTOMATED RETRAINING
+# ============================================
+auto_retraining:
+  enabled: false        # Set to true to enable cron
+  
+  schedule:
+    frequency: "weekly"       # weekly, daily, or custom
+    day_of_week: "Monday"     # For weekly
+    time: "02:00"             # 2 AM
+  
+  triggers:
+    min_new_trades: 20                    # Need 20 new trades
+    min_days_since_last_train: 7          # At least 1 week
+    retrain_if_performance_degrades: true
+    performance_threshold: 0.10           # >10% degradation
+
+# ============================================
+# HARDWARE OPTIMIZATION (M4 Mac)
+# ============================================
+hardware:
+  device: "mps"                 # Metal Performance Shaders (M4 GPU)
+  num_workers: 4                # Parallel environments
+  
+  # Memory management
+  gradient_checkpointing: false # Set true if OOM
+  mixed_precision: false        # Set true for faster training
+  
+  # Performance
+  use_tensorboard: true
+  save_replay_buffer: false     # Set true to save experience
+
+# ============================================
+# LOGGING
+# ============================================
+logging:
+  level: "INFO"             # DEBUG, INFO, WARNING, ERROR
+  
+  tensorboard:
+    dir: "logs/tensorboard/"
+    enabled: true
+  
+  checkpoints:
+    dir: "checkpoints/"
+    save_freq: 10_000
+    keep_n_latest: 5        # Keep only 5 most recent
+  
+  evaluation:
+    dir: "logs/eval/"
+    save_metrics: true
+    save_episodes: false    # Set true to save episode videos
+
+# ============================================
+# DEPLOYMENT
+# ============================================
+deployment:
+  # Safety checks before deployment
+  require_quality_gates: true
+  require_ab_testing: true
+  require_manual_approval: false    # Set true for extra safety
+  
+  # Rollback strategy
+  auto_rollback_if_worse: true
+  rollback_threshold: 0.05          # Rollback if >5% worse
+  
+  # Integration
+  wrapper_file: "trained_model_wrapper.py"
+  integration_guide: "DEPLOYMENT_GUIDE.md"
