@@ -1,4 +1,4 @@
-python-binance>=1.0.19
+python-binance>=1.0.37
 python-dotenv>=1.0.0
 loguru>=0.7.2
 feedparser>=6.0.10
